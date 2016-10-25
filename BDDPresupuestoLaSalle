@@ -1,0 +1,112 @@
+/*
+	LaSalle Mexico - Francois Delessard
+*/
+
+package BDD.Objis.jbdc;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import Data.GastosPagos;
+import Data.Presupuesto;
+
+public class BDDGastoPago
+{
+	static String url = "jdbc:mysql://localhost/controldepresupuesto";
+	static String login = "root";
+	static String passwd = "";
+	static Connection cn = null;
+	static Statement st = null;
+	static ResultSet rs =null;
+	static ResultSet Gastos = null;
+	public static double gastoV;
+	
+	
+	public static void InitializationBDD() throws SQLException
+	{
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		cn = DriverManager.getConnection(url, login, passwd);
+		st = cn.createStatement();
+	}
+	
+	public static void closeDatabase() throws SQLException
+	{
+	cn.close();
+	st.close();
+	}
+	
+	public static void AgregarGastoPago() throws ClassNotFoundException
+	{
+		GastosPagos Mes = new GastosPagos();
+		GastosPagos Dia = new GastosPagos();
+		GastosPagos Tipo = new GastosPagos();
+		GastosPagos Cantidad = new GastosPagos();
+		GastosPagos Categoria = new GastosPagos();
+		GastosPagos SubCategoria = new GastosPagos();
+
+		
+		try 
+		{
+			InitializationBDD();																										
+			String AgregarPresupuesto = ("INSERT INTO presupuesto(Mes,Dia,Tipo,Cantidad,Categoria,SubCategoria) " + "VALUES('"+Mes.getMes()+"','"+Dia.getDia()+"','"+Tipo.getDirigido()+"','"+Cantidad.getCantidad()+"','"+Categoria.getCategoria()+"','"+SubCategoria.getSubcategoria()+"')");
+			st.executeUpdate(AgregarPresupuesto);
+		}
+		
+		/* Probando una Exception todo lo tiempo porque no podemos ponerla en una funcion */
+		
+		catch (SQLException a) 
+		{
+			a.printStackTrace();
+		} 
+		finally 
+		{
+			try 
+			{
+			closeDatabase();	
+			} catch (SQLException a) 
+			{
+				a.printStackTrace();
+			}
+			}
+			
+	}
+	
+	public static Number CantidadGastoPago()
+	{
+			double gastoV=0;
+			Connection cn =null;
+			Statement st =null;
+			try 
+			{
+				Class.forName("com.mysql.jdbc.Driver");
+				cn = DriverManager.getConnection(url, login, passwd);
+				st = cn.createStatement();
+				String gasto = "SELECT Cantidad FROM gasto";
+				Gastos = st.executeQuery(gasto);		
+				while (Gastos.next()) 
+				{
+					Gastos.getDouble("Cantidad");
+					gastoV = Gastos.getDouble("Cantidad") + gastoV ;
+				}					
+			}
+			 catch (SQLException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					cn.close();
+					st.close();} catch (SQLException e) {e.printStackTrace();}}
+			return gastoV;			
+			}
+
+
+}
